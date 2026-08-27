@@ -1,70 +1,78 @@
 # Process overview
 
-<!-- TEMPLATE: this file is a shape to fill in, not a form. Replace everything
-     in it with your own overview, and delete this comment — `pnpm
-     check:evidence` will remind you if it's still here. -->
-
-A reading-guide to how the work came together --- a map to your process, not an
-essay about it. Markers read this file and follow its citations; they don't
-trawl the repo for evidence you didn't point at, so if a moment mattered, cite
-it.
-
-This file is the shape; the course site's
-[assessment page](https://comp.anu.edu.au/courses/comp4020-agentic-coding-studio/topics/assessment/#what-you-submit)
-is the requirement, and its
-[word counts](https://comp.anu.edu.au/courses/comp4020-agentic-coding-studio/topics/assessment/#word-counts)
-cover every deliverable.
-
 ## What I built
 
-One paragraph: the thing, and the idea behind it.
+Monkey Fruit Catch: a Canvas-based arcade game where you steer a monkey's
+basket left/right to catch five kinds of falling fruit across five 30-second
+stages. Each stage picks one fruit as a 2x bonus and a different one as a
+-1000 penalty at random, revealed on a stage-intro screen right before that
+stage's fruit starts falling, then never mentioned again until the score
+breakdown at the end. Difficulty ramps stage to stage via faster fall speed
+and a shorter spawn interval; the run ends with a final breakdown and a
+one-click restart.
 
 ## The moments that mattered
 
-Three or four for an assignment; fewer is fine for a weekly prototype. Keep the
-list short so each moment has room to do all four jobs:
+1. **The plan's own start-screen text broke a rule the repo already
+   enforced.** PLAN.md's spec called for an on-screen "Move the monkey with
+   ← and →" blurb, but `spec/crit-5.test.ts`'s `NO_TUTORIAL_PATTERN` check
+   (already in the repo before the game existed) explicitly bans exactly that
+   kind of text — this crit's spec requires the opening screen to teach by
+   affordance, not words. Rather than silently keep the blurb (failing the
+   test) or silently drop it (quietly overriding the plan), I flagged the
+   conflict and got an explicit call before writing any game code, then
+   recorded it as an amendment at the top of PLAN.md rather than editing the
+   brief's own words. The shipped start screen has no instructional text —
+   only an idle monkey/fruit animation — and the no-tutorial test passes
+   against the built page.
+   [`bb67e08`](https://github.com/comp4020-agentic-coding-studio/comp4020-crit5-mayRhee218/commit/bb67e08)
 
-1. **what happened** --- the problem, or the thing that went wrong
-2. **what you did instead of the obvious thing** --- the call you made, and why
-   it beat the obvious one
-3. **how you knew it was right** --- the check you ran, the viewport you looked
-   at, what you read before accepting the diff
-4. **the citation** --- a commit or commit range, a `CLAUDE.md` change, a check
-   that went from red to green, a prompt paired with the commit it produced
+2. **The one rule the spec wants a focused test for had nothing to import.**
+   The bonus/2x and penalty/-1000 role assignment lived entirely inside
+   `main.js`'s closures, tangled up with canvas and DOM state — there was no
+   way to unit-test it without either re-implementing the logic in the test
+   (proving nothing) or faking it through a DOM proxy. Instead of doing
+   either, I pulled `assignStageRoles`/`roleForFruit`/`scoreForRole` out into
+   a dependency-free `game-rules.js` module, switched `main.js`/`index.html`
+   to an ES-module script so the browser and `vitest` import the exact same
+   file, and added `allowJs`/`checkJs` to `tsconfig.json` so `tsc` could
+   still type-check the test against it. `pnpm check` now runs real
+   assertions on the actual algorithm (exactly one bonus and one different
+   penalty per stage, 2x/-1000 scoring, re-shuffled every call) instead of a
+   DOM heuristic.
+   [`0179875`](https://github.com/comp4020-agentic-coding-studio/comp4020-crit5-mayRhee218/commit/0179875)
 
-Jobs 2 and 3 are the ones the repo can't tell a reader on its own, so they're
-where the marks are. The strongest moments are the ones where a correction
-landed in the **harness** --- the standards and checks your work has to satisfy
---- rather than in a retry: a rule added to `CLAUDE.md`, a check wired up, an
-attempt thrown away. Retrying until it passes is the routine case, and changing
-what the work runs against is the skilled one.
+3. **`pnpm check` was fully green and the game still didn't work.** Driving
+   the built page with Playwright — not just running the test suite — the
+   very first click on START GAME hung. Playwright's own timeout log named
+   the cause: `#final-result`, which carries the `hidden` attribute, was
+   still intercepting pointer events. `.overlay { display: flex }` and the
+   browser's default `[hidden] { display: none }` have equal specificity, and
+   the author stylesheet wins the tie, so every overlay was laid out and
+   click-active regardless of `hidden`. I added `.overlay[hidden] { display:
+   none; }` rather than reaching for `!important` or restructuring the
+   markup, then re-ran the same Playwright script end to end (start screen →
+   catch fruit → stage-1 result → next stage) with zero console errors before
+   trusting it again.
+   [`c8893cf`](https://github.com/comp4020-agentic-coding-studio/comp4020-crit5-mayRhee218/commit/c8893cf)
 
-Cite each moment as a link whose text is the commit hash or range and whose
-target is this repo's commit or compare URL, so a reader clicks straight to the
-evidence:
+4. **Playing it surfaced a design mistake the tests couldn't catch.** After
+   actually playing a full stage, the bonus/penalty reveal on the
+   stage-result screen turned out to be useless — it named the fruit that had
+   mattered for the stage that had *just ended*, not the one about to start:
 
-- one commit: [`a1b2c3d`](https://github.com/YOUR-ORG/YOUR-REPO/commit/a1b2c3d)
-- a range:
-  [`a1b2c3d...e4f5a6b`](https://github.com/YOUR-ORG/YOUR-REPO/compare/a1b2c3d...e4f5a6b)
+   > The bonus/penalty fruits are currently appearing at the end of the stage
+   > instead of at the beginning. Please show the bonus/penalty fruits for
+   > each stage before that stage starts.
 
-To pair a prompt with the commit it produced, quote the prompt (curated, not a
-full transcript) next to the citation:
-
-> the prompt, verbatim
-
-Screenshots are welcome where one carries the verification better than a
-sentence does. Commit the file to this repo and link it with a **relative**
-path, which is what makes it render on GitHub: `![alt text](docs/before.png)`.
-Images don't count towards the word count and don't replace the citation.
-
-## Before you ship
-
-`pnpm check:evidence` verifies your citations resolve to real commits, that a
-reflection entry the marker reads is in `reflections/`, and that your
-`CLAUDE.md` is there --- before a marker ever opens the file. It checks that
-your map is traceable, not that it is good: the marker judges whether your
-small, deliberately chosen set of moments shows real judgement and reflection. A
-green check is not a substitute for that curation.
-
-Images aren't checked: unlike a citation whose SHA doesn't resolve, a broken
-image is visible the moment this file is rendered on GitHub.
+   I moved role assignment out of `startStage` into a new `prepareStage`
+   step and added a stage-intro overlay that reveals the stage's fruit roles
+   before any fruit falls, trimming the post-stage screen back to the score
+   only — rather than showing the reveal in both places, which would have
+   been redundant, or silently ignoring PLAN.md section 18's default
+   "don't reveal during play" guidance (its own text carves out an exception
+   "if there is a deliberate UI design reason to do so", which this is: the
+   player still learns nothing new once a stage is underway). Re-verified
+   with Playwright: START GAME now lands on a "STAGE 1 / 5" screen naming
+   both fruits before "START STAGE" begins the timer.
+   [`636c86e`](https://github.com/comp4020-agentic-coding-studio/comp4020-crit5-mayRhee218/commit/636c86e)
