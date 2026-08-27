@@ -12,6 +12,14 @@
 > `scripts/build.ts`, `.oxlintrc.json`, `.stylelintrc.json`, `tsconfig.json`).
 > The game is implemented in those three files rather than
 > `script.js`/`style.css`.
+>
+> **Amendment (bonus/penalty reveal timing):** Section 18 allows revealing the
+> bonus/penalty fruit "if there is a deliberate UI design reason to do so."
+> Per direct request, the reveal moved from the post-stage result screen to a
+> new stage-intro screen shown *before* each stage's fruit starts falling —
+> the player still isn't told anything once play is underway, but now goes in
+> knowing what to chase and what to dodge rather than finding out
+> retroactively. The stage-result screen keeps the score breakdown only.
 
 You are an expert game developer and frontend engineer. Build a complete, polished, playable browser game based on the following specification.
 

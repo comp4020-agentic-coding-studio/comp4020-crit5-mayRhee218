@@ -41,14 +41,23 @@
           </div>
         </section>
 
+        <section id="stage-intro" class="overlay" hidden>
+          <div class="overlay-card">
+            <p id="stage-intro-heading" class="overlay-heading"></p>
+            <dl class="result-stats">
+              <div><dt>Bonus fruit</dt><dd id="stage-intro-bonus"></dd></div>
+              <div><dt>Penalty fruit</dt><dd id="stage-intro-penalty"></dd></div>
+            </dl>
+            <button id="begin-stage-btn" type="button">START STAGE</button>
+          </div>
+        </section>
+
         <section id="stage-result" class="overlay" hidden>
           <div class="overlay-card">
             <p id="stage-result-heading" class="overlay-heading"></p>
             <dl class="result-stats">
               <div><dt>Stage score</dt><dd id="stage-result-score"></dd></div>
               <div><dt>Total score</dt><dd id="stage-result-total"></dd></div>
-              <div><dt>Bonus fruit</dt><dd id="stage-result-bonus"></dd></div>
-              <div><dt>Penalty fruit</dt><dd id="stage-result-penalty"></dd></div>
             </dl>
             <button id="next-stage-btn" type="button">NEXT STAGE</button>
           </div>

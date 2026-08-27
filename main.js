@@ -25,12 +25,16 @@ const popupLayer = document.getElementById("popup-layer");
 const startScreen = document.getElementById("start-screen");
 const startBtn = document.getElementById("start-btn");
 
+const stageIntroScreen = document.getElementById("stage-intro");
+const stageIntroHeading = document.getElementById("stage-intro-heading");
+const stageIntroBonus = document.getElementById("stage-intro-bonus");
+const stageIntroPenalty = document.getElementById("stage-intro-penalty");
+const beginStageBtn = document.getElementById("begin-stage-btn");
+
 const stageResultScreen = document.getElementById("stage-result");
 const stageResultHeading = document.getElementById("stage-result-heading");
 const stageResultScore = document.getElementById("stage-result-score");
 const stageResultTotal = document.getElementById("stage-result-total");
-const stageResultBonus = document.getElementById("stage-result-bonus");
-const stageResultPenalty = document.getElementById("stage-result-penalty");
 const nextStageBtn = document.getElementById("next-stage-btn");
 
 const finalScreen = document.getElementById("final-result");
@@ -183,10 +187,12 @@ function hideOverlay(el) {
 function setMode(mode) {
   state.mode = mode;
   hideOverlay(startScreen);
+  hideOverlay(stageIntroScreen);
   hideOverlay(stageResultScreen);
   hideOverlay(finalScreen);
   hud.hidden = mode !== "playing";
   if (mode === "start") showOverlay(startScreen);
+  if (mode === "stage-intro") showOverlay(stageIntroScreen);
   if (mode === "stage-result") showOverlay(stageResultScreen);
   if (mode === "final") showOverlay(finalScreen);
 }
@@ -199,9 +205,22 @@ function currentSpawnMultiplier() {
   return STAGE_SPAWN_INTERVAL_MULTIPLIERS[state.stage - 1];
 }
 
-function startStage(stageNumber) {
+// Assigns the upcoming stage's fruit roles and shows them before any fruit
+// falls, so "before that stage starts" is a real reveal rather than a
+// mid-stage hint --- the player still isn't told anything once play begins.
+function prepareStage(stageNumber) {
   state.stage = stageNumber;
   state.roles = assignStageRoles();
+  const bonusFruit = FRUIT_BY_KEY.get(state.roles.bonus);
+  const penaltyFruit = FRUIT_BY_KEY.get(state.roles.penalty);
+  stageIntroHeading.textContent = `STAGE ${stageNumber} / ${STAGE_COUNT}`;
+  stageIntroBonus.textContent = `${bonusFruit.emoji} ${capitalize(bonusFruit.key)}`;
+  stageIntroPenalty.textContent = `${penaltyFruit.emoji} ${capitalize(penaltyFruit.key)}`;
+  setMode("stage-intro");
+}
+
+function startStage(stageNumber) {
+  state.stage = stageNumber;
   state.timeRemaining = STAGE_DURATION_SECONDS;
   state.fruits = [];
   state.spawnTimer = 0;
@@ -223,13 +242,9 @@ function resetGame() {
 function endStage() {
   state.fruits = [];
   if (state.stage < STAGE_COUNT) {
-    const bonusFruit = FRUIT_BY_KEY.get(state.roles.bonus);
-    const penaltyFruit = FRUIT_BY_KEY.get(state.roles.penalty);
     stageResultHeading.textContent = `STAGE ${state.stage} COMPLETE`;
     stageResultScore.textContent = formatScore(state.stageScores[state.stage - 1]);
     stageResultTotal.textContent = formatScore(state.score);
-    stageResultBonus.textContent = `${bonusFruit.emoji} ${capitalize(bonusFruit.key)}`;
-    stageResultPenalty.textContent = `${penaltyFruit.emoji} ${capitalize(penaltyFruit.key)}`;
     setMode("stage-result");
   } else {
     const best = state.stageScores.reduce(
@@ -257,12 +272,13 @@ function capitalize(s) {
 startBtn.addEventListener("click", () => {
   ensureAudio()?.resume?.();
   resetGame();
-  startStage(1);
+  prepareStage(1);
 });
-nextStageBtn.addEventListener("click", () => startStage(state.stage + 1));
+beginStageBtn.addEventListener("click", () => startStage(state.stage));
+nextStageBtn.addEventListener("click", () => prepareStage(state.stage + 1));
 playAgainBtn.addEventListener("click", () => {
   resetGame();
-  startStage(1);
+  prepareStage(1);
 });
 
 // --- Popups ----------------------------------------------------------------
