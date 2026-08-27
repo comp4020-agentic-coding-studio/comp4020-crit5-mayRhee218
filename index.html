@@ -3,17 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>COMP4020 prototype</title>
+    <title>Monkey Fruit Catch</title>
     <meta
       name="description"
-      content="Replace this with one sentence saying what this page is. A search result and a link preview both show it."
+      content="Catch falling fruit in your basket across five escalating stages — but one fruit each stage costs you."
     />
 
-    <!--
-      The link-preview card: public/card.png, 1200x630 --- replace it. The URL
-      resolves against this page, like any link. No og:title/og:description:
-      scrapers fall back to the <title> and description above.
-    -->
     <meta property="og:type" content="website" />
     <meta property="og:image" content="./card.png" />
     <meta name="twitter:card" content="summary_large_image" />
@@ -27,12 +22,54 @@
       </nav>
     </header>
     <main>
-      <h1>COMP4020 prototype</h1>
-      <p>
-        Replace this with your prototype. This week's brief is on the course website;
-        <code>spec/README.md</code> explains how the checks in this repo relate to it.
-      </p>
+      <h1 class="visually-hidden">Monkey Fruit Catch</h1>
+      <div id="game-root">
+        <canvas id="game-canvas"></canvas>
+
+        <div id="hud" hidden>
+          <span id="hud-stage"></span>
+          <span id="hud-score"></span>
+          <span id="hud-time"></span>
+        </div>
+
+        <div id="popup-layer" aria-hidden="true"></div>
+
+        <section id="start-screen" class="overlay">
+          <div class="overlay-card">
+            <p class="title-emoji">🍌🍎🍇🍊🍐</p>
+            <button id="start-btn" type="button" autofocus>START GAME</button>
+          </div>
+        </section>
+
+        <section id="stage-result" class="overlay" hidden>
+          <div class="overlay-card">
+            <p id="stage-result-heading" class="overlay-heading"></p>
+            <dl class="result-stats">
+              <div><dt>Stage score</dt><dd id="stage-result-score"></dd></div>
+              <div><dt>Total score</dt><dd id="stage-result-total"></dd></div>
+              <div><dt>Bonus fruit</dt><dd id="stage-result-bonus"></dd></div>
+              <div><dt>Penalty fruit</dt><dd id="stage-result-penalty"></dd></div>
+            </dl>
+            <button id="next-stage-btn" type="button">NEXT STAGE</button>
+          </div>
+        </section>
+
+        <section id="final-result" class="overlay" hidden>
+          <div class="overlay-card">
+            <p class="overlay-heading">GAME COMPLETE!</p>
+            <p id="final-score" class="final-score"></p>
+            <dl id="final-breakdown" class="result-stats"></dl>
+            <p id="final-extra"></p>
+            <button id="play-again-btn" type="button">PLAY AGAIN</button>
+          </div>
+        </section>
+
+        <div id="touch-controls" aria-hidden="true">
+          <button id="touch-left" type="button" tabindex="-1" aria-hidden="true">◀</button>
+          <button id="touch-right" type="button" tabindex="-1" aria-hidden="true">▶</button>
+        </div>
+      </div>
     </main>
-    <script src="./main.js"></script>
+    <script type="module" src="./main.js"></script>
   </body>
 </html>

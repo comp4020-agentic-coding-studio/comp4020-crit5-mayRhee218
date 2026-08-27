@@ -14,7 +14,11 @@
     "moduleDetection": "force",
     "verbatimModuleSyntax": true,
     "useDefineForClassFields": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    // game-rules.js is plain JS, imported by both main.js (browser) and the
+    // spec tests (typecheck); allowJs lets tsc infer its shape for the latter.
+    "allowJs": true,
+    "checkJs": false
   },
-  "include": ["*.ts", "spec", "scripts"]
+  "include": ["*.ts", "*.js", "spec", "scripts"]
 }
