@@ -104,6 +104,10 @@ main {
   animation: fade-in 0.25s ease-out;
 }
 
+.overlay[hidden] {
+  display: none;
+}
+
 .overlay-card {
   width: min(90%, 22rem);
   background: linear-gradient(180deg, #fff8e6, #ffe9b0);
